@@ -39,12 +39,9 @@ namespace BangazonWorkforce.Controllers
                     {
 
                         //joins employee, department, and computer tables
-                        string command = $@"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.IsSuperVisor, e.DepartmentId,
-                        d.Id AS 'Department Id', d.Name AS 'Department', d.Budget ,c.Id AS 'Computer Id', 
-						c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate
-                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id
-						LEFT JOIN ComputerEmployee ce ON e.Id = ce.EmployeeId
-                        LEFT JOIN Computer c ON ce.ComputerId=c.Id";
+                        string command = $@"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.DepartmentId,
+                        d.Id AS 'Department Id', d.Name AS 'Department'
+                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id";
 
                         cmd.CommandText = command;
                         SqlDataReader reader = cmd.ExecuteReader();
@@ -53,45 +50,22 @@ namespace BangazonWorkforce.Controllers
                         while (reader.Read())
                         {
 
-                            //currentcomputer will default to null, because...
 
                             Employee employee = new Employee
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 CurrentDepartment = new Department()
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Department Id")),
                                     Name = reader.GetString(reader.GetOrdinal("Department")),
-                                    Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
-                                },
-                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                                CurrentComputer = null
-
+                                    
+                                }
                             };
-                            //if the reader finds a value for an employee under the computer id column, it will attach the computer to the employee under their currentcomputer
-                            if (!reader.IsDBNull(reader.GetOrdinal("Computer Id")))
-                            {
-                                Computer computer = new Computer()
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Computer Id")),
-                                    Make = reader.GetString(reader.GetOrdinal("Make")),
-                                    Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
-                                    PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
 
-                                };
-                                employee.CurrentComputer = computer;
-                            }
-
-                            //this checks to see if the decomissiondate for a computer exists, if it does, it sets the date on the computer
-
-                            if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
-                            {
-                                employee.CurrentComputer.DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
-
-                            }
+                        
+                    
+                           
 
 
                             employees.Add(employee);
