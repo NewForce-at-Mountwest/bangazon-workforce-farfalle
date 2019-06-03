@@ -44,7 +44,7 @@ namespace BangazonWorkforce.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        string commandText = $"SELECT Id, PurchaseDate, Make, Manufacturer FROM Computer WHERE DecomissionDate IS NULL";
+                        string commandText = $"SELECT Id, Make, Manufacturer FROM Computer";
 
                         cmd.CommandText = commandText;
 
@@ -58,7 +58,6 @@ namespace BangazonWorkforce.Controllers
                             computer = new Computer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
                                 Make = reader.GetString(reader.GetOrdinal("Make")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                             };
@@ -80,7 +79,43 @@ namespace BangazonWorkforce.Controllers
         // GET: Computers/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    string commandText = $"SELECT Id, PurchaseDate, DecomissionDate, Make, Manufacturer FROM Computer WHERE Id={id}";
+
+                    cmd.CommandText = commandText;
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    List<Computer> computers = new List<Computer>();
+                    Computer computer = null;
+
+
+                    while (reader.Read())
+                    {
+                        computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+
+
+
+                    }
+
+
+                    reader.Close();
+
+                    return View(computer);
+
+                }
+            }
         }
 
         private ActionResult View()
