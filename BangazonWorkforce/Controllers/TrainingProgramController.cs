@@ -57,7 +57,7 @@ namespace BangazonWorkforce.Controllers
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
                             };
                             DateTime now = DateTime.Now;
-                            if (!(DateTime.Compare(trainingProgram.EndDate, now) < 0))
+                            if (!(DateTime.Compare(trainingProgram.StartDate, now) < 0))
                             {
                                 trainingPrograms.Add(trainingProgram);
                             }
