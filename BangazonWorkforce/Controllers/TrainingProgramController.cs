@@ -77,49 +77,10 @@ namespace BangazonWorkforce.Controllers
         }
 
         // GET: TrainingProgram/Create
-        public ActionResult Create(int id)
+        public ActionResult Create()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-            SELECT t.Id,
-                t.Name,
-                t.StartDate,
-                t.EndDate,
-                t.MaxAttendees
-            FROM TrainingProgram t 
-            WHERE Id = @id";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    TrainingProgram trainingProgram = null;
-                    if (reader.Read())
-                    {
-        
-                                trainingProgram = new TrainingProgram
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                    Name = reader.GetString(reader.GetOrdinal("Name")),
-                                    StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
-                                    EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
-                                };
-                           
-                            reader.Close();
-                            return View(trainingProgram);
-                        }
-                        else
-                        {
-                            return View();
-                        };
-
-                    }
-                }
-            }
-        
-        
+            return View();
+        }
 
         // POST: TrainingProgram/Create
         [HttpPost]
@@ -128,22 +89,28 @@ namespace BangazonWorkforce.Controllers
         {
                 using (SqlConnection conn = Connection)
                 {
-                    
-                        conn.Open();
-                        using (SqlCommand cmd = conn.CreateCommand())
-                        {
-                            cmd.CommandText = @"INSERT INTO TrainingProgram
+                if (ModelState.IsValid)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO TrainingProgram
                 (Name, StartDate, EndDate, MaxAttendees)
                 VALUES
                 (@Name, @StartDate, @EndDAte, @MaxAttendees)";
-                            cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
-                            cmd.Parameters.Add(new SqlParameter("@StartDate", trainingProgram.StartDate));
-                            cmd.Parameters.Add(new SqlParameter("@EndDate", trainingProgram.EndDate));
-                            cmd.Parameters.Add(new SqlParameter("@MaxAttendees", trainingProgram.MaxAttendees));
-                            cmd.ExecuteNonQuery();
+                        cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
+                        cmd.Parameters.Add(new SqlParameter("@StartDate", trainingProgram.StartDate));
+                        cmd.Parameters.Add(new SqlParameter("@EndDate", trainingProgram.EndDate));
+                        cmd.Parameters.Add(new SqlParameter("@MaxAttendees", trainingProgram.MaxAttendees));
+                        cmd.ExecuteNonQuery();
 
-                            return RedirectToAction(nameof(Index));
-                        }
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                else
+                {
+                    return View();
+                }
                  
             }
             }        

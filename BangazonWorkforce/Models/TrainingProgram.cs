@@ -18,7 +18,7 @@ namespace BangazonWorkforce.Models
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (EndDate < StartDate)
+            if  ((DateTime.Compare(EndDate, StartDate) < 0))
             {
                 yield return new ValidationResult(
                     $"End date must be later than start date.",
