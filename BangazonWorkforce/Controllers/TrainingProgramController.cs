@@ -154,38 +154,93 @@ namespace BangazonWorkforce.Controllers
                         cmd.ExecuteNonQuery();
 
                         return RedirectToAction(nameof(Index));
-                    }
-                }
-                else
-                {
+                        }
+                    }else{
                     return View();
-                }
+                    }
                  
-            }
-            }        
+                }
+        }
 
-        // GET: TrainingProgram/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+            SELECT 
+                t.Id, t.Name, t.StartDate, t.EndDate, t.MaxAttendees
+            FROM TrainingProgram t 
+            WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    TrainingProgram training = null;
+                    if (reader.Read())
+                    {
+                        training = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+
+                        };
+                    }
+
+                    reader.Close();
+
+                    return View(training);
+                }
+            }
         }
 
-        // POST: TrainingProgram/Edit/5
+        // POST: Cohorts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, TrainingProgram training)
         {
-            try
-            {
-                // TODO: Add update logic here
+          using (SqlConnection conn = Connection)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"UPDATE TrainingProgram
+                                            SET Name = @Name, 
+                                            StartDate = @StartDate,
+                                            EndDate = @EndDate,
+                                            MaxAttendees = @MaxAttendees
+                                            WHERE Id = @id";
+                            cmd.Parameters.Add(new SqlParameter("@Name", training.Name));
+                            cmd.Parameters.Add(new SqlParameter("@StartDate", training.StartDate));
+                            cmd.Parameters.Add(new SqlParameter("@EndDate", training.EndDate));
+                            cmd.Parameters.Add(new SqlParameter("@MaxAttendees", training.MaxAttendees));
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                            cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                            training = new TrainingProgram();
+
+                            int rowsAffected = cmd.ExecuteNonQuery();
+
+                            return RedirectToAction(nameof(Index));
+
+                        }
+                    }
+                    else
+                    {
+                        return View(training);
+                    }
+
+                    }
+                }
+            
+                
+         
 
         public ActionResult Delete(int id)
         {

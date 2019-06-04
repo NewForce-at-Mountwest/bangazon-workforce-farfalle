@@ -45,7 +45,7 @@
     <hr />
     @if (Model.Employees.Count > 0)
     {
-        <h4>Currently assigned:</h4>
+        <h4>Currently registered:</h4>
         @foreach (var employee in Model.Employees)
 
         {
@@ -59,11 +59,12 @@
     <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.DepartmentId)</dt>
     <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.DepartmentId)</dd>
 </dl>
+    <hr />
         }
     }
     else
     {
-        <p>No employees currently registered!</p>
+        <h4>No employees currently registered!</h4>
 
     }
 </div>
