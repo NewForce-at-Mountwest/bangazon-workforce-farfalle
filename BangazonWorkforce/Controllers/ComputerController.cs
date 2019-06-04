@@ -39,7 +39,7 @@ namespace BangazonWorkforce.Controllers
         /// </summary>
         /// <returns>List<Computer></returns>
         // GET: Computers
-        public ActionResult Index()
+        public ActionResult Index(string searchString)
         {
 
             using (SqlConnection conn = Connection)
@@ -48,6 +48,12 @@ namespace BangazonWorkforce.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     string commandText = $"SELECT Id, Make, Manufacturer FROM Computer";
+
+
+                    if (!String.IsNullOrEmpty(searchString))
+                    {
+                        commandText += $" WHERE Make LIKE '%{searchString}%' OR Manufacturer LIKE '%{searchString}%'";
+                    }
 
                     cmd.CommandText = commandText;
 
