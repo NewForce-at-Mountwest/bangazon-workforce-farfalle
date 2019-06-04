@@ -73,7 +73,58 @@ namespace BangazonWorkforce.Controllers
         // GET: TrainingProgram/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @" SELECT t.Id as 'trainingId', 
+                                        t.Name, t.StartDate, t.EndDate, 
+                                        t.MaxAttendees, e.Id AS 'Employee Id', e.FirstName, 
+                                        e.LastName, e.DepartmentId FROM EmployeeTraining et
+                                        JOIN Employee e on et.EmployeeId = e.id 
+                                        JOIN TrainingProgram t on et.TrainingProgramId = t.id";
+                                       
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    TrainingProgram trainingToDisplay = null;
+                    int counter = 0;
+
+                    while (reader.Read())
+                    {
+                        if (counter < 1)
+                        {
+                            TrainingProgram training = new TrainingProgram
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                            };
+                            
+                            trainingToDisplay = training;
+                            counter++;
+                        };
+                        Employee employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                        };
+
+                        if (!trainingToDisplay.Employees.Any(e => e.Id == employee.Id))
+                        {
+                            trainingToDisplay.Employees.Add(employee);
+                        }
+                    }
+                    reader.Close();
+                    return View(trainingToDisplay);
+                }
+            }
         }
 
         // GET: TrainingProgram/Create
