@@ -90,11 +90,15 @@ namespace BangazonWorkforce.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.IsSuperVisor, e.DepartmentId,
-                        d.Id AS 'Department Id', d.Name AS 'Department', d.Budget ,c.Id AS 'Computer Id', tp.Name AS ProgramName,
+                        d.Id AS 'Department Id', d.Name AS 'Department', d.Budget ,c.Id AS 'Computer Id', tp.Name AS 
+						ProgramName,
 						c.Make, c.Manufacturer, c.PurchaseDate, c.DecomissionDate, tp.Id AS 'Training Id'
-                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id
+                        FROM Employee e LEFT JOIN Department d ON e.DepartmentId = d.Id
 						LEFT JOIN ComputerEmployee ce ON e.Id = ce.EmployeeId
-                        LEFT JOIN Computer c ON ce.ComputerId=c.Id JOIN EmployeeTraining et ON e.Id = et.EmployeeId LEFT JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id WHERE e.Id = @id ";
+                        LEFT JOIN Computer c ON ce.ComputerId=c.Id LEFT JOIN EmployeeTraining et ON e.Id = et.EmployeeId 
+						LEFT JOIN 
+						TrainingProgram tp 
+						ON et.TrainingProgramId = tp.Id WHERE e.Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
                         SqlDataReader reader = cmd.ExecuteReader();
 
@@ -123,13 +127,18 @@ namespace BangazonWorkforce.Controllers
                                 };
                             }
 
-                            TrainingProgram trainingProgram = new TrainingProgram()
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Training Id")),
-                                Name = reader.GetString(reader.GetOrdinal("ProgramName"))
-                            };
 
-                            employee.TrainingPrograms.Add(trainingProgram);
+                            if (!reader.IsDBNull(reader.GetOrdinal("Training Id"))) {
+                                TrainingProgram trainingProgram = new TrainingProgram()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Training Id")),
+                                    Name = reader.GetString(reader.GetOrdinal("ProgramName"))
+                                };
+
+                                employee.TrainingPrograms.Add(trainingProgram);
+                            }
+
+
 
                             if (!reader.IsDBNull(reader.GetOrdinal("Computer Id")))
                             {
