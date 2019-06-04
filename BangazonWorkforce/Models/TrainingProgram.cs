@@ -11,21 +11,19 @@ namespace BangazonWorkforce.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        [Required]
         public DateTime StartDate { get; set; }
-        [Required]
         public DateTime EndDate { get; set; }
         public int MaxAttendees { get; set; }
         public List<Employee> Employees { get; set; } = new List<Employee>();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (DateTime.Compare(StartDate, EndDate) > 0)
+            if (EndDate < StartDate)
             {
-                yield return
-                  new ValidationResult(errorMessage: "EndDate must be greater than StartDate",
-                                       memberNames: new[] { "EndDate" });
+                yield return new ValidationResult(
+                    $"End date must be later than start date.",
+                    new[] { "EndDate" });
             }
         }
-    } 
+    }
 }

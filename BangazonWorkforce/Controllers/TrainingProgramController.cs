@@ -98,8 +98,7 @@ namespace BangazonWorkforce.Controllers
                     TrainingProgram trainingProgram = null;
                     if (reader.Read())
                     {
-                        
-                           
+        
                                 trainingProgram = new TrainingProgram
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
