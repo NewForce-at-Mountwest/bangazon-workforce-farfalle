@@ -83,7 +83,7 @@ namespace BangazonWorkforce.Controllers
                                         t.MaxAttendees, e.Id AS 'Employee Id', e.FirstName, 
                                         e.LastName, e.DepartmentId FROM EmployeeTraining et
                                         JOIN Employee e on et.EmployeeId = e.id 
-                                        JOIN TrainingProgram t on et.TrainingProgramId = t.id";
+                                        JOIN TrainingProgram t on et.TrainingProgramId = t.id WHERE t.Id = @id";
                                        
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -98,11 +98,11 @@ namespace BangazonWorkforce.Controllers
                         {
                             TrainingProgram training = new TrainingProgram
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingId")),
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
-                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
                             };
                             
                             trainingToDisplay = training;
