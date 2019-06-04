@@ -82,42 +82,40 @@ namespace BangazonWorkforce.Controllers
                                         t.Name, t.StartDate, t.EndDate, 
                                         t.MaxAttendees, e.Id AS 'Employee Id', e.FirstName, 
                                         e.LastName, e.DepartmentId FROM EmployeeTraining et
-                                        JOIN Employee e on et.EmployeeId = e.id 
-                                        JOIN TrainingProgram t on et.TrainingProgramId = t.id WHERE t.Id = @id";
+                                        FULL JOIN Employee e on et.EmployeeId = e.id 
+                                        FULL JOIN TrainingProgram t on et.TrainingProgramId = t.id WHERE t.Id = @id";
                                        
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     TrainingProgram trainingToDisplay = null;
-                    int counter = 0;
+                   
 
                     while (reader.Read())
                     {
-                        if (counter < 1)
+                        if (trainingToDisplay == null)
                         {
-                            TrainingProgram training = new TrainingProgram
+                            trainingToDisplay = new TrainingProgram
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("trainingId")),
                                 Name = reader.GetString(reader.GetOrdinal("Name")),
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                                 MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+                                Employees = new List<Employee>()
                             };
-                            
-                            trainingToDisplay = training;
-                            counter++;
                         };
-                        Employee employee = new Employee
+                        if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
-                        };
-
-                        if (!trainingToDisplay.Employees.Any(e => e.Id == employee.Id))
-                        {
+                            Employee employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                               
+                            };
                             trainingToDisplay.Employees.Add(employee);
                         }
                     }

@@ -41,26 +41,29 @@
             @Html.DisplayFor(model => model.MaxAttendees)
         </dd>
     </dl>
-    <h4>Currently assigned:</h4>
+
     <hr />
     @if (Model.Employees.Count > 0)
     {
+        <h4>Currently assigned:</h4>
         @foreach (var employee in Model.Employees)
 
         {
-            <dl class="row">
-                <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.Id) </dt>
-                <dd class="col-sm-10"> @Html.DisplayFor(ModelItem => employee.Id)</dd>
-                <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.FirstName)</dt>
-                <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.LastName)</dd>
-                <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.DepartmentId)</dt>
-                <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.DepartmentId)</dd>
-            </dl>
+<dl class="row">
+    <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.Id) </dt>
+    <dd class="col-sm-10"> @Html.DisplayFor(ModelItem => employee.Id)</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.FirstName)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.FirstName)</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.LastName)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.LastName)</dd>
+    <dt class="col-sm-2">@Html.DisplayNameFor(ModelItem => employee.DepartmentId)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(ModelItem => employee.DepartmentId)</dd>
+</dl>
         }
     }
     else
     {
-    <p>No employees currently registered!</p>
+        <p>No employees currently registered!</p>
 
     }
 </div>
