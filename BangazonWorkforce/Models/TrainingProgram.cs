@@ -8,9 +8,9 @@ namespace BangazonWorkforce.Models
 {
     public class TrainingProgram
     {
-        [Display(Name = "Program Id")]
+
         public int Id { get; set; }
-        [Display(Name = "Program Name")]
+
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
