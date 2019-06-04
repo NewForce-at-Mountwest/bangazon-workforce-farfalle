@@ -20,5 +20,7 @@ namespace BangazonWorkforce.Models
         public string Make { get; set; }
 
         public string Manufacturer { get; set; }
+
+        public Employee CurrentEmployee { get; set; }
     }
 }

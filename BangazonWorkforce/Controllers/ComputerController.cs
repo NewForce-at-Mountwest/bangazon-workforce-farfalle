@@ -48,7 +48,7 @@ namespace BangazonWorkforce.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    string commandText = $"SELECT Id, Make, Manufacturer FROM Computer";
+                    string commandText = $"SELECT c.Id as 'Computer Id', c.Make, c.Manufacturer, e.id as 'Employee Id', e.FirstName, e.LastName, ce.AssignDate, ce.UnassignDate FROM Computer c LEFT JOIN ComputerEmployee ce ON CE.ComputerId = c.Id LEFT JOIN Employee e ON ce.employeeId=e.Id ";
 
 
                     if (!String.IsNullOrEmpty(searchString))
@@ -61,18 +61,39 @@ namespace BangazonWorkforce.Controllers
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Computer> computers = new List<Computer>();
                     Computer computer = null;
+                    Employee employee = null;
 
 
                     while (reader.Read())
                     {
+
+
                         computer = new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("Computer Id")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                         };
 
+                        //Check to see if the computer is already on the computers list.  If it is, make sure that you are getting the one that is currently assigned, and not the one that is unassigned. 
+                        //Also check to make sure that the computer that is added isn't one that is unassigned
+                        if (!computers.Any(c => c.Id == computer.Id)) {
+                            Computer computerOnList = computers.Where(s => s.Id == computer.Id).First();
+
+
+                            if (reader.IsDBNull(reader.GetOrdinal("UnassignDate")) && !reader.IsDBNull(reader.GetOrdinal("assignDate"))) { 
+                        employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        };
+                        computer.CurrentEmployee = employee;
+                        }
+
                         computers.Add(computer);
+                        }
+
                     }
 
                     reader.Close();
