@@ -9,7 +9,11 @@ namespace BangazonWorkforce.Models
     public class Computer
     {
         public int Id { get; set; }
+        [Display(Name = "Purchase Date")]
+
         public DateTime? PurchaseDate { get; set; }
+
+        [Display(Name = "Decommission Date")]
 
         public DateTime? DecomissionDate { get; set; }
         [Display(Name = "Computer Make")]
