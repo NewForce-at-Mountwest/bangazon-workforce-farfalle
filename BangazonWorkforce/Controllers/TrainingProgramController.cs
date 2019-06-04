@@ -98,54 +98,56 @@ namespace BangazonWorkforce.Controllers
                     TrainingProgram trainingProgram = null;
                     if (reader.Read())
                     {
-                        trainingProgram = new TrainingProgram
+                        
+                           
+                                trainingProgram = new TrainingProgram
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                                    StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                    EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
+                                };
+                           
+                            reader.Close();
+                            return View(trainingProgram);
+                        }
+                        else
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
-                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
-
+                            return View();
                         };
+
                     }
-
-                    reader.Close();
-
-                    return View(trainingProgram);
                 }
             }
-        }
+        
+        
 
         // POST: TrainingProgram/Create
-        // POST: Cohorts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(TrainingProgram trainingProgram)
         {
-            try { 
-            using (SqlConnection conn = Connection)
+                using (SqlConnection conn = Connection)
                 {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                    cmd.CommandText = @"INSERT INTO TrainingProgram
+                    
+                        conn.Open();
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"INSERT INTO TrainingProgram
                 (Name, StartDate, EndDate, MaxAttendees)
                 VALUES
                 (@Name, @StartDate, @EndDAte, @MaxAttendees)";
-                    cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
-                    cmd.Parameters.Add(new SqlParameter("@StartDate", trainingProgram.StartDate));
-                    cmd.Parameters.Add(new SqlParameter("@EndDate", trainingProgram.EndDate));
-                    cmd.Parameters.Add(new SqlParameter("@MaxAttendees", trainingProgram.MaxAttendees));
-                    cmd.ExecuteNonQuery();
+                            cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
+                            cmd.Parameters.Add(new SqlParameter("@StartDate", trainingProgram.StartDate));
+                            cmd.Parameters.Add(new SqlParameter("@EndDate", trainingProgram.EndDate));
+                            cmd.Parameters.Add(new SqlParameter("@MaxAttendees", trainingProgram.MaxAttendees));
+                            cmd.ExecuteNonQuery();
 
-                    return RedirectToAction(nameof(Index));
-                    }
-                    }
-                }
-            catch
-            {
-                return View();
+                            return RedirectToAction(nameof(Index));
+                        }
+                 
             }
-        }
+            }        
 
         // GET: TrainingProgram/Edit/5
         public ActionResult Edit(int id)
@@ -170,26 +172,64 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
-        // GET: TrainingProgram/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+            SELECT s.Id,
+                s.Name,
+                s.StartDate,
+                s.EndDate,  
+                s.MaxAttendees
+            FROM TrainingProgram s 
+            WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    TrainingProgram trainingProgram = null;
+                    if (reader.Read())
+                    {
+                        trainingProgram= new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+                        };
+                    }
+
+                    reader.Close();
+
+                    return View(trainingProgram);
+                }
+            }
         }
 
-        // POST: TrainingProgram/Delete/5
+        // POST: Cohorts/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
-            try
+            using (SqlConnection conn = Connection)
             {
-                // TODO: Add delete logic here
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE FROM TrainingProgram WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+                    throw new Exception("No rows affected");
+                }
             }
         }
     }
