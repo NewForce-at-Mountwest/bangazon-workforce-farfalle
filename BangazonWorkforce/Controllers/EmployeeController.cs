@@ -10,6 +10,7 @@ using BangazonWorkforce.Models;
 
 namespace BangazonWorkforce.Controllers
 {
+    //Employee controller for mvc views, authored by Sable Bowen
     public class EmployeeController : Controller
     {
         private readonly IConfiguration _config;
@@ -84,7 +85,7 @@ namespace BangazonWorkforce.Controllers
                 using (SqlConnection conn = Connection)
                 {
 
-                    //same as above, but just for one person
+                    
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
