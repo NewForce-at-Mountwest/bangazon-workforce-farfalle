@@ -34,7 +34,10 @@ namespace BangazonWorkforce.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-
+        /// <summary>
+        /// This method returns a list of all the computers in the database
+        /// </summary>
+        /// <returns>List<Computer></returns>
         // GET: Computers
         public ActionResult Index()
         {
@@ -73,7 +76,11 @@ namespace BangazonWorkforce.Controllers
 
 
         }
-
+        /// <summary>
+        /// This method gets the details of the computer the user has selected to view
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         // GET: Computers/Details/5
         public ActionResult Details(int id)
         {
@@ -122,7 +129,10 @@ namespace BangazonWorkforce.Controllers
         }
 
 
-
+        /// <summary>
+        /// This auto-generates the form to add a computer to the database based on the Computer model
+        /// </summary>
+        /// <returns></returns>
         // GET: Computer/Create
         public ActionResult Create()
         {
@@ -130,7 +140,11 @@ namespace BangazonWorkforce.Controllers
 
             return View();
         }
-
+        /// <summary>
+        /// This posts a new computer to the database
+        /// </summary>
+        /// <param name="computer"></param>
+        /// <returns>A new computer to be posted</returns>
         // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -169,6 +183,7 @@ namespace BangazonWorkforce.Controllers
             return View();
         }
 
+        
         // POST: Computers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -186,6 +201,11 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
+        /// <summary>
+        /// This method populates the page with the selected computer to delete
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Computer to be deleted</returns>
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
@@ -239,8 +259,11 @@ namespace BangazonWorkforce.Controllers
         // POST: Computers/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Computer computer)
         {
+            ///<summary>Check to see if there are any error messages to display</summary>
+            var errMsg = TempData["ErrorMessage"] as string;
+
             try
             {
                 using (SqlConnection conn = Connection)
@@ -255,22 +278,24 @@ namespace BangazonWorkforce.Controllers
                         cmd.CommandText = commandText;
                         SqlDataReader reader = cmd.ExecuteReader();
 
-                        //If the query comes back with no results, it has never been assigned to anyone and can be deleted safely
+                        /// <summary>If the query comes back with results, the computer has been assigned and cannot be deleted</summary>
                         if (reader.Read())
                         {
                             doesThisComputerHaveUser = true;
-                            return RedirectToAction(nameof(Delete));
+                            throw new Exception("This computer has a user");
                         }
-                        
+                        reader.Close();
+
                     }
+                    /// <summary>If the query comes back with no results, the computer has not been assigned and can be safely deleted</summary>
 
                     if (doesThisComputerHaveUser == false)
                     {
-                        using (SqlCommand cmd2 = conn.CreateCommand())
+                        using (SqlCommand cmd = conn.CreateCommand())
                         {
-                            cmd2.CommandText = @"DELETE FROM Computer WHERE Id = @id";
-                            cmd2.Parameters.Add(new SqlParameter("@id", id));
-                            int rowsAffected = cmd2.ExecuteNonQuery();
+                            cmd.CommandText = @"DELETE FROM Computer WHERE Id = @id";
+                            cmd.Parameters.Add(new SqlParameter("@id", id));
+                            int rowsAffected = cmd.ExecuteNonQuery();
                             if (rowsAffected > 0)
                             {
                                 return RedirectToAction(nameof(Index));
@@ -284,7 +309,9 @@ namespace BangazonWorkforce.Controllers
             }
             catch
             {
-                return RedirectToAction(nameof(Index));
+                ///<summary>Display an error message if computer cannot be deleted</summary>
+                TempData["ErrorMessage"] = "This computer cannot be deleted because it has a user";
+                return RedirectToAction(nameof(Delete));
             }
         }
     }
