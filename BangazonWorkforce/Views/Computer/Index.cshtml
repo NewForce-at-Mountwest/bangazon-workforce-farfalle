@@ -9,25 +9,16 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 @using (Html.BeginForm())
 {
     <p>
-        Title: @Html.TextBox("SearchString") <br />
-        <input type="submit" value="Filter" />
+        @Html.TextBox("SearchString", "",new { placeholder = "Filter by make or manufacturer", style = "width:250px" }) <br />
     </p>
 }
 
 
-@*<form asp-action="Index">
-    <div asp-validation-summary="ModelOnly" class="text-danger">
-        <div class="form-group">
-            <label asp-for="searchString" class="control-label"></label>
-            <input asp-for="searchString" class="form-control" />
-            <span asp-validation-for="searchString" class="text-danger"></span>
 
-        </div>
-    </div>
-</form>*@
 
 <table class="table">
 
