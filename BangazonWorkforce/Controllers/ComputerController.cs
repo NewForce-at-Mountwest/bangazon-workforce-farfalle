@@ -6,6 +6,7 @@
 
 
 using BangazonWorkforce.Models;
+using BangazonWorkforce.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -142,9 +143,11 @@ namespace BangazonWorkforce.Controllers
         // GET: Computer/Create
         public ActionResult Create()
         {
-
-
-            return View();
+            //Creates a new instance based on the view model
+            CreateComputerViewModel computerViewModel = new CreateComputerViewModel
+                (_config.GetConnectionString("DefaultConnection"));
+            //Pass it to the view
+            return View(computerViewModel);
         }
         /// <summary>
         /// This posts a new computer to the database
@@ -154,7 +157,7 @@ namespace BangazonWorkforce.Controllers
         // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Computer computer)
+        public ActionResult Create(CreateComputerViewModel computerViewModel)
         {
             try
             {
@@ -166,12 +169,23 @@ namespace BangazonWorkforce.Controllers
                         cmd.CommandText = @"INSERT INTO Computer (make, manufacturer, purchaseDate, decomissionDate)
                                                 OUTPUT INSERTED.Id
                                                 VALUES (@make, @manufacturer, @purchaseDate, null)";
-                        cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
-                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer));
-                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
+                        cmd.Parameters.Add(new SqlParameter("@make", computerViewModel.computer.Make));
+                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computerViewModel.computer.Manufacturer));
+                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computerViewModel.computer.PurchaseDate));
 
                         int newId = (int)cmd.ExecuteScalar();
-                        computer.Id = newId;
+                        computerViewModel.computer.Id = newId;
+
+                        cmd.CommandText = @"INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate, UnassignDate)
+                                                OUTPUT INSERTED.Id
+                                                VALUES (@employeeId, @computerId, @assignDate, null)";
+                        cmd.Parameters.Add(new SqlParameter("@employeeId", computerViewModel.employeeId));
+                        cmd.Parameters.Add(new SqlParameter("@computerId", newId));
+                        cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
+
+
+                        int newCEId = (int)cmd.ExecuteScalar();
+
 
                         return RedirectToAction(nameof(Index));
                     }
