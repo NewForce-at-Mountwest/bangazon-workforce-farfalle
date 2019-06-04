@@ -9,7 +9,19 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+@using (Html.BeginForm())
+{
+    <p>
+        @Html.TextBox("SearchString", "",new { placeholder = "Filter by make or manufacturer", style = "width:250px" }) <br />
+    </p>
+}
+
+
+
+
 <table class="table">
+
     <thead>
         <tr>
             <th>
@@ -25,20 +37,22 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-           
-            <td>
-                <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Make)</a>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
 
-            </td>
-            <td>
-                <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Manufacturer)</a>            </td>
-            
-        </tr>
-}
+                <td>
+                    <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Make)</a>
+
+                </td>
+                <td>
+                    <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Manufacturer)</a>
+                </td>
+
+            </tr>
+        }
     </tbody>
 </table>
