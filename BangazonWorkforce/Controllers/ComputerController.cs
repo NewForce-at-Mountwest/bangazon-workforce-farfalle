@@ -177,29 +177,8 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
-        // GET: Computers/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        
-        // POST: Computers/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+         
+    
 
         /// <summary>
         /// This method populates the page with the selected computer to delete
@@ -209,6 +188,9 @@ namespace BangazonWorkforce.Controllers
         // GET: Computers/Delete/5
         public ActionResult Delete(int id)
         {
+            ///<summary>Check to see if there are any error messages to display</summary>
+            var errMsg = TempData["ErrorMessage"] as string;
+
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
