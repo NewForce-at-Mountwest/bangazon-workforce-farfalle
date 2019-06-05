@@ -71,13 +71,14 @@
 <div>
     @if (Model.StartDate > DateTime.Now)
     {
-        @Html.ActionLink("Edit", "Edit", new { id = Model.Id })
-        <a asp-action="Index">Back to future trainings</a>
+        @Html.ActionLink("Edit |", "Edit", new { id = Model.Id }) 
+        <a asp-action="Index">Back to upcoming trainings</a>
 
     }
     else
     {
-     <a asp-action="List">Back to past trainings</a>
+        <br />
+        <a asp-action="List">Back to past trainings</a>
     }
 
 </div>
