@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace BangazonWorkforce.Models.ViewModels
 {
-    public class DetailEmployeeViewModel
+    public class AssignEmployeeViewModel
     {
         public Employee employee { get; set; }
+        public int selectedTrainingProgramId { get; set; }
         public List<SelectListItem> TrainingPrograms { get; set; }
 
 
@@ -23,9 +24,9 @@ namespace BangazonWorkforce.Models.ViewModels
             }
         }
 
-        public DetailEmployeeViewModel() { }
+        public AssignEmployeeViewModel() { }
 
-        public DetailEmployeeViewModel(string connectionString)
+        public AssignEmployeeViewModel(string connectionString)
         {
             _connectionString = connectionString;
 
@@ -51,16 +52,16 @@ namespace BangazonWorkforce.Models.ViewModels
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, [Name], StartDate, EndDate, MaxAttendees FROM TrainingProgram";
+                    cmd.CommandText = "SELECT Id, [Name] as 'name', StartDate, EndDate, MaxAttendees FROM TrainingProgram";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<TrainingProgram> employees = new List<TrainingProgram>();
+                    List<TrainingProgram> TrainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        employees.Add(new TrainingProgram
+                        TrainingPrograms.Add(new TrainingProgram
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("[Name]")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
                             StartDate= reader.GetDateTime(reader.GetOrdinal("StartDate")),
                             EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")
@@ -71,7 +72,7 @@ namespace BangazonWorkforce.Models.ViewModels
 
                     reader.Close();
 
-                    return employees;
+                    return TrainingPrograms;
                 }
             }
         }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using BangazonWorkforce.Models;
+using BangazonWorkforce.Models.ViewModels;
 
 namespace BangazonWorkforce.Controllers
 {
@@ -154,7 +155,9 @@ namespace BangazonWorkforce.Controllers
                         }
                         reader.Close();
 
+                       
                         return View(employee);
+
                     }
                 }
             }
@@ -219,6 +222,32 @@ namespace BangazonWorkforce.Controllers
             try
             {
                 // TODO: Add delete logic here
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Employee/Assign/5
+        public ActionResult Assign(int id)
+        {
+            AssignEmployeeViewModel assignView = new AssignEmployeeViewModel(_config.GetConnectionString("DefaultConnection"));
+
+
+            return View(assignView);
+        }
+
+        // POST: Employee/Assign/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Assign(int id, IFormCollection collection)
+        {
+            try
+            {
+                // TODO: Add update logic here
 
                 return RedirectToAction(nameof(Index));
             }
