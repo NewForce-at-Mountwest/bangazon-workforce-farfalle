@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using BangazonWorkforce.Models;
+using BangazonWorkforce.Models.ViewModels;
 
 namespace BangazonWorkforce.Controllers
 {
@@ -60,13 +61,14 @@ namespace BangazonWorkforce.Controllers
                                 CurrentDepartment = new Department()
                                 {
                                     Name = reader.GetString(reader.GetOrdinal("Department")),
-                                    
+
                                 }
                             };
 
-                        
-                    
-                           
+
+
+
+
 
 
                             employees.Add(employee);
@@ -77,6 +79,7 @@ namespace BangazonWorkforce.Controllers
                 }
             }
         }
+    
 
         // GET: Employee/Details/5
         public ActionResult Details(int id)
@@ -162,23 +165,50 @@ namespace BangazonWorkforce.Controllers
             // GET: Employee/Create
             public ActionResult Create()
         {
-            return View();
-        }
+             CreateEmployeeViewModel createEmployeeViewModel = new CreateEmployeeViewModel(_config.GetConnectionString("DefaultConnection"));
+
+            return View(createEmployeeViewModel);
+
+
+        
+    }
 
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(CreateEmployeeViewModel model)
         {
-            try
-            {
-                // TODO: Add insert logic here
+            using (SqlConnection conn = Connection)
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
             {
-                return View();
+                if (ModelState.IsValid)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+
+                    {
+                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, IsSuperVisor, DepartmentId) VALUES (@firstName, @lastName, @isSuperVisor, @departmentId)";
+
+                        cmd.Parameters.Add(new SqlParameter("@firstName", model.employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastName", model.employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentId", model.employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@isSuperVisor", model.employee.IsSuperVisor));
+
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                }
+                else
+                {
+                    CreateEmployeeViewModel createEmployeeViewModel = new CreateEmployeeViewModel(_config.GetConnectionString("DefaultConnection"));
+
+                    
+
+
+                    return View(createEmployeeViewModel);
+                }
             }
         }
 
