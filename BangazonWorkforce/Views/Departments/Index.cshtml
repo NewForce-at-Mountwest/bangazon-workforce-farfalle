@@ -39,9 +39,17 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Budget)
             </td>
+            @if (item.Employees != null)
+            {
             <td>
                 @item.Employees.Count()
             </td>
+            }
+            else {
+            <td>
+                0
+             </td>
+            }
             <td>
                 @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
                 @Html.ActionLink("Details", "Details", new { id = item.Id }) |

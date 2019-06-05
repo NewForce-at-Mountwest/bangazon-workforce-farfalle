@@ -55,7 +55,6 @@ namespace BangazonWorkforce.Controllers
                     List<Department> departments = new List<Department>();
                     while (reader.Read())
                     {
-
                         Department department = new Department
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -63,36 +62,39 @@ namespace BangazonWorkforce.Controllers
                             Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
                             Employees = new List<Employee>()
                         };
-
-                        Employee employee = new Employee()
+                        if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
-                        };
-                        if (departments.Any(d => d.Id == department.Id))
-                        {
-
-                            Department departmentToReference = departments.Where(d => d.Id == department.Id).FirstOrDefault();
-
-                            if (!departmentToReference.Employees.Any(s => s.Id == employee.Id))
+                            Employee employee = new Employee()
                             {
-                                departmentToReference.Employees.Add(employee);
+                                Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            };
+                            if (departments.Any(d => d.Id == department.Id))
+                            {
+                                Department departmentToReference = departments.Where(d => d.Id == department.Id).FirstOrDefault();
+
+                                if (!departmentToReference.Employees.Any(s => s.Id == employee.Id))
+                                {
+                                    departmentToReference.Employees.Add(employee);
+                                }
                             }
-
-
+                            else
+                            {
+                                department.Employees.Add(employee);
+                                departments.Add(department);
+                            }
                         }
-                        else
+                        else if (department.Employees.Count() == 0)
                         {
-                            department.Employees.Add(employee);
                             departments.Add(department);
-                        }
+                        };
                     }
-                    reader.Close();
-                    return View(departments);
+                        reader.Close();
+                        return View(departments);
                 }
-
+                
             }
         }
 
@@ -102,26 +104,40 @@ namespace BangazonWorkforce.Controllers
             return View();
         }
 
-        // GET: Department/Create
+        // GETPOST: Department/
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: Department/Create
+        // POST: TrainingProgram/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create(Department department)
         {
-            try
+            using (SqlConnection conn = Connection)
             {
-                // TODO: Add insert logic here
+                if (ModelState.IsValid)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO Department
+                (Name, Budget)
+                VALUES
+                (@Name, @Budget)";
+                        cmd.Parameters.Add(new SqlParameter("@Name", department.Name));
+                        cmd.Parameters.Add(new SqlParameter("@Budget", department.Budget));
+                        cmd.ExecuteNonQuery();
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                else
+                {
+                    return View();
+                }
+
             }
         }
 
