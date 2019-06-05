@@ -70,6 +70,49 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
+        public ActionResult List()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+            SELECT t.Id,
+                t.Name,
+                t.StartDate,
+                t.EndDate,
+                t.MaxAttendees
+            FROM TrainingProgram t
+        ";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+                    while (reader.Read())
+                    {
+
+                        TrainingProgram trainingProgram = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        };
+                        DateTime now = DateTime.Now;
+                        if ((DateTime.Compare(trainingProgram.StartDate, now) < 0))
+                        {
+                            trainingPrograms.Add(trainingProgram);
+                        }
+                    }
+
+                    reader.Close();
+
+                    return View(trainingPrograms);
+                }
+            }
+        }
+
         // GET: TrainingProgram/Details/5
         public ActionResult Details(int id)
         {
@@ -120,6 +163,7 @@ namespace BangazonWorkforce.Controllers
                         }
                     }
                     reader.Close();
+
                     return View(trainingToDisplay);
                 }
             }
@@ -192,8 +236,14 @@ namespace BangazonWorkforce.Controllers
                     }
 
                     reader.Close();
-
-                    return View(training);
+                    DateTime now = DateTime.Now;
+                    if (!(DateTime.Compare(training.EndDate, now) < 0))
+                    {
+                        return View(training);
+                    }
+                    else {
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
             }
         }
