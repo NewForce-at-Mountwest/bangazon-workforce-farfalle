@@ -263,7 +263,7 @@ namespace BangazonWorkforce.Controllers
         // GET: Employee/Assign/5
         public ActionResult Assign(int id)
         {
-            AssignEmployeeViewModel assignView = new AssignEmployeeViewModel(_config.GetConnectionString("DefaultConnection"));
+            AssignEmployeeViewModel assignView = new AssignEmployeeViewModel(_config.GetConnectionString("DefaultConnection"), id);
 
 
             return View(assignView);
