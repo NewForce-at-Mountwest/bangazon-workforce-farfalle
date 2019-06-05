@@ -98,10 +98,57 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
-            // GET: Department/Details/5
-            public ActionResult Details(int id)
+        public ActionResult Details(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @" SELECT d.Id as 'departmentId', 
+                                        d.Name, d.Budget,
+                                        e.Id AS 'Employee Id', e.FirstName, 
+                                        e.LastName, e.DepartmentId FROM Department d
+                                        FULL JOIN Employee e on e.departmentId = d.id WHERE d.Id = @id"; 
+                                        
+
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Department department = null;
+
+
+                    while (reader.Read())
+                    {
+                        if (department == null)
+                        {
+                           department = new Department
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("departmentId")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                                Employees = new List<Employee>()
+                            };
+                        };
+                        //adds an employee if it exists to the trainings employee list
+                        if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
+                        {
+                            Employee employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                            };
+                            department.Employees.Add(employee);
+                        }
+                    }
+                    reader.Close();
+
+                    return View(department);
+                }
+            }
         }
 
         // GETPOST: Department/
@@ -117,8 +164,7 @@ namespace BangazonWorkforce.Controllers
         {
             using (SqlConnection conn = Connection)
             {
-                if (ModelState.IsValid)
-                {
+                
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
@@ -132,12 +178,7 @@ namespace BangazonWorkforce.Controllers
 
                         return RedirectToAction(nameof(Index));
                     }
-                }
-                else
-                {
-                    return View();
-                }
-
+             
             }
         }
 
