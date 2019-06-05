@@ -211,6 +211,12 @@ namespace BangazonWorkforce.Controllers
 
                         int newCEId = (int)cmd.ExecuteScalar();
 
+                        cmd.CommandText = @"UPDATE ComputerEmployee SET UnassignDate = @unassignDate WHERE employeeID = @employeeId AND computerId != @computerId";
+                       
+                        cmd.Parameters.Add(new SqlParameter("@unassignDate", DateTime.Now));
+
+                        cmd.ExecuteScalar();
+
 
                         return RedirectToAction(nameof(Index));
                     }
@@ -337,7 +343,7 @@ namespace BangazonWorkforce.Controllers
             catch
             {
                 ///<summary>Display an error message if computer cannot be deleted</summary>
-                TempData["ErrorMessage"] = "This computer cannot be deleted because it has a user";
+                TempData["ErrorMessage"] = "This computer cannot be deleted because it is currently or previously assigned to an employee";
                 return RedirectToAction(nameof(Delete));
             }
         }
