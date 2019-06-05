@@ -31,41 +31,70 @@ namespace BangazonWorkforce.Controllers
                     return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
                 }
             }
-            // GET ALL DEPARTMENTS
+        // GET ALL DEPARTMENTS
 
-            public ActionResult Index()
+        public ActionResult Index()
+        {
+            using (SqlConnection conn = Connection)
             {
-                using (SqlConnection conn = Connection)
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"
+                    cmd.CommandText = @"
             SELECT t.Id,
                 t.Name,
-                t.Budget
-            FROM Department t
+                t.Budget,
+                E.Id AS 'Employee Id',
+                E.FirstName,
+                E.LastName,
+                E.DepartmentId
+            FROM Department t LEFT JOIN Employee E ON E.DepartmentId = t.Id
         ";
-                        SqlDataReader reader = cmd.ExecuteReader();
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-                        List<Department> departments = new List<Department>();
-                        while (reader.Read())
+                    List<Department> departments = new List<Department>();
+                    while (reader.Read())
+                    {
+
+                        Department department = new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                            Employees = new List<Employee>()
+                        };
+
+                        Employee employee = new Employee()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                        };
+                        if (departments.Any(d => d.Id == department.Id))
                         {
 
-                            Department department = new Department
+                            Department departmentToReference = departments.Where(d => d.Id == department.Id).FirstOrDefault();
+
+                            if (!departmentToReference.Employees.Any(s => s.Id == employee.Id))
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Name = reader.GetString(reader.GetOrdinal("Name")),
-                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
-                            };
-                           
-                                departments.Add(department); 
+                                departmentToReference.Employees.Add(employee);
+                            }
+
+
                         }
-                        reader.Close();
-                        return View(departments);
+                        else
+                        {
+                            department.Employees.Add(employee);
+                            departments.Add(department);
+                        }
                     }
+                    reader.Close();
+                    return View(departments);
                 }
+
             }
+        }
 
             // GET: Department/Details/5
             public ActionResult Details(int id)
