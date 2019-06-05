@@ -20,7 +20,7 @@ namespace BangazonWorkforce.Models
         [Display(Name = "Max Attendees")]
         public int MaxAttendees { get; set; }
         public List<Employee> Employees { get; set; } = new List<Employee>();
-
+        //This ensures that a new training program must have an end date later than the start date
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if  ((DateTime.Compare(EndDate, StartDate) < 0))

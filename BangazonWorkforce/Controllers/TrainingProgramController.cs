@@ -10,6 +10,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonWorkforce.Controllers
 {
+    ///  Controller for training programs. Full crud, but there's a second GET all for past trainings. 
+    ///  By Connor FitzGerald
+    
     public class TrainingProgramsController : Controller
     {
         private readonly IConfiguration _config;
@@ -26,7 +29,8 @@ namespace BangazonWorkforce.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-        // GET: TrainingPrograms
+        // GET ALL TRAINING PROGRAMS THAT START AFTER TODAY'S DATE
+       
         public ActionResult Index()
         {
             using (SqlConnection conn = Connection)
@@ -56,6 +60,7 @@ namespace BangazonWorkforce.Controllers
                             EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
                             };
+                        ///This will only add trainings to the display list if the start date is after today
                             DateTime now = DateTime.Now;
                             if (!(DateTime.Compare(trainingProgram.StartDate, now) < 0))
                             {
@@ -70,6 +75,7 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
+        //This is a list of past trainings
         public ActionResult List()
         {
             using (SqlConnection conn = Connection)
@@ -99,6 +105,7 @@ namespace BangazonWorkforce.Controllers
                             EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
                         };
+                        //Only adds trainings that have already started
                         DateTime now = DateTime.Now;
                         if ((DateTime.Compare(trainingProgram.StartDate, now) < 0))
                         {
@@ -149,6 +156,7 @@ namespace BangazonWorkforce.Controllers
                                 Employees = new List<Employee>()
                             };
                         };
+                        //adds an employee if it exists to the trainings employee list
                         if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
                         {
                             Employee employee = new Employee()
@@ -236,6 +244,8 @@ namespace BangazonWorkforce.Controllers
                     }
 
                     reader.Close();
+                    //hopefully makes it so you can't edit past trainings 
+                    //but there shouldn't be a way to naturally navigate to edit for a past training
                     DateTime now = DateTime.Now;
                     if (!(DateTime.Compare(training.EndDate, now) < 0))
                     {
@@ -255,6 +265,7 @@ namespace BangazonWorkforce.Controllers
         {
           using (SqlConnection conn = Connection)
                 {
+                //validates that the end date is not earlier than the start date
                     if (ModelState.IsValid)
                     {
                         conn.Open();
