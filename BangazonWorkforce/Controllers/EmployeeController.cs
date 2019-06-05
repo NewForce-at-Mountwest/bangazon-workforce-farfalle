@@ -186,10 +186,11 @@ namespace BangazonWorkforce.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Employee ('FirstName', 'LastName', 'IsSuperVisor', 'DepartmentId') VALUES (@firstName, @lastName, @isSuperVisor, @departmentId";
+                        cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, IsSuperVisor, DepartmentId) VALUES (@firstName, @lastName, @isSuperVisor, @departmentId)";
 
                         cmd.Parameters.Add(new SqlParameter("@firstName", model.employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@lastName", model.employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentId", model.employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@isSuperVisor", model.employee.IsSuperVisor));
 
                         cmd.ExecuteNonQuery();
@@ -198,7 +199,7 @@ namespace BangazonWorkforce.Controllers
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
                 return View();
             }
