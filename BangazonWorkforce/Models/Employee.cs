@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BangazonWorkforce.Models
+namespace BangazonWorkforce.Models 
 {
-    public class Employee
+    public class Employee : IValidatableObject
     {
         public int Id { get; set; }
         [Display(Name = "First Name")]
@@ -20,6 +20,16 @@ namespace BangazonWorkforce.Models
 
         public Computer CurrentComputer { get; set; }
         public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (DepartmentId == 0)
+            {
+                yield return new ValidationResult(
+                    $"Employees must be assigned to a department.",
+                    new[] { "DepartmentId" });
+            }
+        }
 
     }
 }

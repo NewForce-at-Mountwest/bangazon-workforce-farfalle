@@ -178,13 +178,14 @@ namespace BangazonWorkforce.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(CreateEmployeeViewModel model)
         {
-            try
-            {
-                using (SqlConnection conn = Connection)
+            using (SqlConnection conn = Connection)
 
+            {
+                if (ModelState.IsValid)
                 {
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
+
                     {
                         cmd.CommandText = @"INSERT INTO Employee (FirstName, LastName, IsSuperVisor, DepartmentId) VALUES (@firstName, @lastName, @isSuperVisor, @departmentId)";
 
@@ -197,11 +198,17 @@ namespace BangazonWorkforce.Controllers
 
                         return RedirectToAction(nameof(Index));
                     }
+
                 }
-            }
-            catch(Exception e)
-            {
-                return View();
+                else
+                {
+                    CreateEmployeeViewModel createEmployeeViewModel = new CreateEmployeeViewModel(_config.GetConnectionString("DefaultConnection"));
+
+                    
+
+
+                    return View(createEmployeeViewModel);
+                }
             }
         }
 
