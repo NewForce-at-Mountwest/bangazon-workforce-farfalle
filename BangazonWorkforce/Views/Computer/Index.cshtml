@@ -33,26 +33,34 @@
             <th>
                 @Html.DisplayNameFor(model => model.Manufacturer)
             </th>
+            <th>
+                Assigned User
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
 
-                <td>
-                    <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Make)</a>
+            <td>
+                <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Make)</a>
 
-                </td>
-                <td>
-                    <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Manufacturer)</a>
-                </td>
+            </td>
+            <td>
+                <a href="@Url.Action("Details", new { id=item.Id})">@Html.DisplayFor(modelItem => item.Manufacturer)</a>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CurrentEmployee.FirstName)
+                @Html.DisplayFor(modelItem => item.CurrentEmployee.LastName)
 
-            </tr>
+            </td>
+
+        </tr>
         }
     </tbody>
 </table>

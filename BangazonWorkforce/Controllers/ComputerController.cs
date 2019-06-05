@@ -6,6 +6,7 @@
 
 
 using BangazonWorkforce.Models;
+using BangazonWorkforce.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -47,12 +48,16 @@ namespace BangazonWorkforce.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    string commandText = $"SELECT Id, Make, Manufacturer FROM Computer";
+                    string commandText = $"SELECT c.Id as 'Computer Id', c.Make, c.Manufacturer, e.id as 'Employee Id', e.FirstName, e.LastName, ce.AssignDate, ce.UnassignDate FROM Computer c LEFT JOIN ComputerEmployee ce ON CE.ComputerId = c.Id LEFT JOIN Employee e ON ce.employeeId=e.Id ";
 
 
                     if (!String.IsNullOrEmpty(searchString))
                     {
-                        commandText += $" WHERE Make LIKE '%{searchString}%' OR Manufacturer LIKE '%{searchString}%'";
+                        commandText += $" WHERE Make LIKE '%{searchString}%' OR Manufacturer LIKE '%{searchString}%' ORDER BY AssignDate DESC";
+                    }
+                    else
+                    {
+                        commandText += $" ORDER BY AssignDate DESC";
                     }
 
                     cmd.CommandText = commandText;
@@ -60,18 +65,39 @@ namespace BangazonWorkforce.Controllers
                     SqlDataReader reader = cmd.ExecuteReader();
                     List<Computer> computers = new List<Computer>();
                     Computer computer = null;
+                    Employee employee = null;
 
 
                     while (reader.Read())
                     {
+
+
                         computer = new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Id = reader.GetInt32(reader.GetOrdinal("Computer Id")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                         };
 
+                        //Check to see if the computer is already on the computers list.  If it is, make sure that you are getting the one that is currently assigned, and not the one that is unassigned. 
+                        //Also check to make sure that the computer that is added isn't one that is unassigned
+                        if (!computers.Any(c => c.Id == computer.Id)) {
+                            Computer computerOnList = computers.Where(s => s.Id == computer.Id).FirstOrDefault();
+
+
+                            if (reader.IsDBNull(reader.GetOrdinal("UnassignDate")) && !reader.IsDBNull(reader.GetOrdinal("assignDate"))) { 
+                        employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                        };
+                        computer.CurrentEmployee = employee;
+                        }
+
                         computers.Add(computer);
+                        }
+
                     }
 
                     reader.Close();
@@ -142,9 +168,11 @@ namespace BangazonWorkforce.Controllers
         // GET: Computer/Create
         public ActionResult Create()
         {
-
-
-            return View();
+            //Creates a new instance based on the view model
+            CreateComputerViewModel computerViewModel = new CreateComputerViewModel
+                (_config.GetConnectionString("DefaultConnection"));
+            //Pass it to the view
+            return View(computerViewModel);
         }
         /// <summary>
         /// This posts a new computer to the database
@@ -154,7 +182,7 @@ namespace BangazonWorkforce.Controllers
         // POST: Computers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Computer computer)
+        public ActionResult Create(CreateComputerViewModel computerViewModel)
         {
             try
             {
@@ -166,12 +194,33 @@ namespace BangazonWorkforce.Controllers
                         cmd.CommandText = @"INSERT INTO Computer (make, manufacturer, purchaseDate, decomissionDate)
                                                 OUTPUT INSERTED.Id
                                                 VALUES (@make, @manufacturer, @purchaseDate, null)";
-                        cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
-                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer));
-                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computer.PurchaseDate));
+                        cmd.Parameters.Add(new SqlParameter("@make", computerViewModel.computer.Make));
+                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computerViewModel.computer.Manufacturer));
+                        cmd.Parameters.Add(new SqlParameter("@purchaseDate", computerViewModel.computer.PurchaseDate));
 
                         int newId = (int)cmd.ExecuteScalar();
-                        computer.Id = newId;
+                        computerViewModel.computer.Id = newId;
+
+                        /// <summary>If the user selects an employee to whom they want to assign the computer, assign and unassign old</summary>
+                        if (computerViewModel.employeeId != 0) 
+                            {
+                                cmd.CommandText = @"INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate, UnassignDate)
+                                                OUTPUT INSERTED.Id
+                                                VALUES (@employeeId, @computerId, @assignDate, null)";
+                                cmd.Parameters.Add(new SqlParameter("@employeeId", computerViewModel.employeeId));
+                                cmd.Parameters.Add(new SqlParameter("@computerId", newId));
+                                cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
+
+
+                                int newCEId = (int)cmd.ExecuteScalar();
+
+                                cmd.CommandText = @"UPDATE ComputerEmployee SET UnassignDate = @unassignDate WHERE employeeID = @employeeId AND computerId != @computerId";
+
+                                cmd.Parameters.Add(new SqlParameter("@unassignDate", DateTime.Now));
+
+                                cmd.ExecuteScalar();
+                            }
+
 
                         return RedirectToAction(nameof(Index));
                     }
@@ -298,7 +347,7 @@ namespace BangazonWorkforce.Controllers
             catch
             {
                 ///<summary>Display an error message if computer cannot be deleted</summary>
-                TempData["ErrorMessage"] = "This computer cannot be deleted because it has a user";
+                TempData["ErrorMessage"] = "This computer cannot be deleted because it is currently or previously assigned to an employee";
                 return RedirectToAction(nameof(Delete));
             }
         }
