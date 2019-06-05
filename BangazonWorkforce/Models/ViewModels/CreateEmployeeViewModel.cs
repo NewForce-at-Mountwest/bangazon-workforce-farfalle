@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace BangazonWorkforce.Models.ViewModels
 {
+    //Used for creating a new employee 
+    //Authored by Sable Bowen
     public class CreateEmployeeViewModel
     {
         public Employee employee { get; set; }
@@ -25,11 +27,13 @@ namespace BangazonWorkforce.Models.ViewModels
 
         public CreateEmployeeViewModel() { }
 
+        
         public CreateEmployeeViewModel(string connectionString)
         {
             _connectionString = connectionString;
 
             {
+                //Creates a list of department select items for dropdown
                 Departments = GetAllDepartments()
                     .Select(department => new SelectListItem()
                     {
