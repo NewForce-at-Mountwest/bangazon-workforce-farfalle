@@ -42,11 +42,11 @@ namespace BangazonWorkforce.Models.ViewModels
                 })
                 .ToList();
 
-            Employees.Insert(0, new SelectListItem
-            {
-                Text = "Assign employee",
-                Value = "0"
-            });
+            //Employees.Insert(0, new SelectListItem
+            //{
+            //    Text = "Assign employee",
+            //    Value = "0"
+            //});
         }
 
         private List<Employee> GetAllEmployees()

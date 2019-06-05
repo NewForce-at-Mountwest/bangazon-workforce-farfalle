@@ -14,23 +14,23 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="computer.Make" class="control-label"></label>
-                <input asp-for="computer.Make" class="form-control" />
+                <input asp-for="computer.Make" class="form-control" required />
                 <span asp-validation-for="computer.Make" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="computer.Manufacturer" class="control-label"></label>
-                <input asp-for="computer.Manufacturer" class="form-control" />
+                <input asp-for="computer.Manufacturer" class="form-control" required/>
                 <span asp-validation-for="computer.Manufacturer" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="computer.PurchaseDate" class="control-label"></label>
-                <input asp-for="computer.PurchaseDate" class="form-control" />
+                <input asp-for="computer.PurchaseDate" class="form-control" required/>
                 <span asp-validation-for="computer.PurchaseDate" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Employees" class="control-label"></label>
-                <select asp-for="employeeId" asp-items="@Model.Employees"></select>
+                <label class="control-label">Assign an Employee</label>
+                <select asp-for="employeeId" asp-items="@Model.Employees" required></select>
             </div>
 
             <div class="form-group">
