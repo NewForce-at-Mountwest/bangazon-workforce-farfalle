@@ -201,21 +201,25 @@ namespace BangazonWorkforce.Controllers
                         int newId = (int)cmd.ExecuteScalar();
                         computerViewModel.computer.Id = newId;
 
-                        cmd.CommandText = @"INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate, UnassignDate)
+                        /// <summary>If the user selects an employee to whom they want to assign the computer, assign and unassign old</summary>
+                        if (computerViewModel.employeeId != 0) 
+                            {
+                                cmd.CommandText = @"INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate, UnassignDate)
                                                 OUTPUT INSERTED.Id
                                                 VALUES (@employeeId, @computerId, @assignDate, null)";
-                        cmd.Parameters.Add(new SqlParameter("@employeeId", computerViewModel.employeeId));
-                        cmd.Parameters.Add(new SqlParameter("@computerId", newId));
-                        cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
+                                cmd.Parameters.Add(new SqlParameter("@employeeId", computerViewModel.employeeId));
+                                cmd.Parameters.Add(new SqlParameter("@computerId", newId));
+                                cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
 
 
-                        int newCEId = (int)cmd.ExecuteScalar();
+                                int newCEId = (int)cmd.ExecuteScalar();
 
-                        cmd.CommandText = @"UPDATE ComputerEmployee SET UnassignDate = @unassignDate WHERE employeeID = @employeeId AND computerId != @computerId";
-                       
-                        cmd.Parameters.Add(new SqlParameter("@unassignDate", DateTime.Now));
+                                cmd.CommandText = @"UPDATE ComputerEmployee SET UnassignDate = @unassignDate WHERE employeeID = @employeeId AND computerId != @computerId";
 
-                        cmd.ExecuteScalar();
+                                cmd.Parameters.Add(new SqlParameter("@unassignDate", DateTime.Now));
+
+                                cmd.ExecuteScalar();
+                            }
 
 
                         return RedirectToAction(nameof(Index));
