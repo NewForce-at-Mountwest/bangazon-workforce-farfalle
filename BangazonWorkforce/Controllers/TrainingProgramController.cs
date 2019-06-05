@@ -10,6 +10,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonWorkforce.Controllers
 {
+    ///  Controller for training programs. Full crud, but there's a second GET all for past trainings. 
+    ///  By Connor FitzGerald
+    
     public class TrainingProgramsController : Controller
     {
         private readonly IConfiguration _config;
@@ -26,7 +29,8 @@ namespace BangazonWorkforce.Controllers
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-        // GET: TrainingPrograms
+        // GET ALL TRAINING PROGRAMS THAT START AFTER TODAY'S DATE
+       
         public ActionResult Index()
         {
             using (SqlConnection conn = Connection)
@@ -56,6 +60,7 @@ namespace BangazonWorkforce.Controllers
                             EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
                             };
+                        ///This will only add trainings to the display list if the start date is after today
                             DateTime now = DateTime.Now;
                             if (!(DateTime.Compare(trainingProgram.StartDate, now) < 0))
                             {
@@ -70,10 +75,106 @@ namespace BangazonWorkforce.Controllers
             }
         }
 
+        //This is a list of past trainings
+        public ActionResult List()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+            SELECT t.Id,
+                t.Name,
+                t.StartDate,
+                t.EndDate,
+                t.MaxAttendees
+            FROM TrainingProgram t
+        ";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+                    while (reader.Read())
+                    {
+
+                        TrainingProgram trainingProgram = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees"))
+                        };
+                        //Only adds trainings that have already started
+                        DateTime now = DateTime.Now;
+                        if ((DateTime.Compare(trainingProgram.StartDate, now) < 0))
+                        {
+                            trainingPrograms.Add(trainingProgram);
+                        }
+                    }
+
+                    reader.Close();
+
+                    return View(trainingPrograms);
+                }
+            }
+        }
+
         // GET: TrainingProgram/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @" SELECT t.Id as 'trainingId', 
+                                        t.Name, t.StartDate, t.EndDate, 
+                                        t.MaxAttendees, e.Id AS 'Employee Id', e.FirstName, 
+                                        e.LastName, e.DepartmentId FROM EmployeeTraining et
+                                        FULL JOIN Employee e on et.EmployeeId = e.id 
+                                        FULL JOIN TrainingProgram t on et.TrainingProgramId = t.id WHERE t.Id = @id";
+                                       
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    TrainingProgram trainingToDisplay = null;
+                   
+
+                    while (reader.Read())
+                    {
+                        if (trainingToDisplay == null)
+                        {
+                            trainingToDisplay = new TrainingProgram
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("trainingId")),
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                                EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+                                Employees = new List<Employee>()
+                            };
+                        };
+                        //adds an employee if it exists to the trainings employee list
+                        if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
+                        {
+                            Employee employee = new Employee()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Employee Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
+                               
+                            };
+                            trainingToDisplay.Employees.Add(employee);
+                        }
+                    }
+                    reader.Close();
+
+                    return View(trainingToDisplay);
+                }
+            }
         }
 
         // GET: TrainingProgram/Create
@@ -105,38 +206,102 @@ namespace BangazonWorkforce.Controllers
                         cmd.ExecuteNonQuery();
 
                         return RedirectToAction(nameof(Index));
-                    }
-                }
-                else
-                {
+                        }
+                    }else{
                     return View();
-                }
+                    }
                  
-            }
-            }        
+                }
+        }
 
-        // GET: TrainingProgram/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+            SELECT 
+                t.Id, t.Name, t.StartDate, t.EndDate, t.MaxAttendees
+            FROM TrainingProgram t 
+            WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    TrainingProgram training = null;
+                    if (reader.Read())
+                    {
+                        training = new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
+
+                        };
+                    }
+
+                    reader.Close();
+                    //hopefully makes it so you can't edit past trainings 
+                    //but there shouldn't be a way to naturally navigate to edit for a past training
+                    DateTime now = DateTime.Now;
+                    if (!(DateTime.Compare(training.EndDate, now) < 0))
+                    {
+                        return View(training);
+                    }
+                    else {
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+            }
         }
 
-        // POST: TrainingProgram/Edit/5
+        // POST: Cohorts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, TrainingProgram training)
         {
-            try
-            {
-                // TODO: Add update logic here
+          using (SqlConnection conn = Connection)
+                {
+                //validates that the end date is not earlier than the start date
+                    if (ModelState.IsValid)
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"UPDATE TrainingProgram
+                                            SET Name = @Name, 
+                                            StartDate = @StartDate,
+                                            EndDate = @EndDate,
+                                            MaxAttendees = @MaxAttendees
+                                            WHERE Id = @id";
+                            cmd.Parameters.Add(new SqlParameter("@Name", training.Name));
+                            cmd.Parameters.Add(new SqlParameter("@StartDate", training.StartDate));
+                            cmd.Parameters.Add(new SqlParameter("@EndDate", training.EndDate));
+                            cmd.Parameters.Add(new SqlParameter("@MaxAttendees", training.MaxAttendees));
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                            cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                            training = new TrainingProgram();
+
+                            int rowsAffected = cmd.ExecuteNonQuery();
+
+                            return RedirectToAction(nameof(Index));
+
+                        }
+                    }
+                    else
+                    {
+                        return View(training);
+                    }
+
+                    }
+                }
+            
+                
+         
 
         public ActionResult Delete(int id)
         {
