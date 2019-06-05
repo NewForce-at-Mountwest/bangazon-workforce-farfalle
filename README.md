@@ -1,6 +1,6 @@
 ## WELCOME TO BANGAZON INC
 
-This application allows the Human Resource 
+This application allows the Human Resource and IT departments at the company Bangazon Inc. to manage employees, departments, training programs and computer resources at the company.
 
 ### EMPLOYEES
 
