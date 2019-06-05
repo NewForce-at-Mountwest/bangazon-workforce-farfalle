@@ -131,7 +131,7 @@ namespace BangazonWorkforce.Controllers
                                 Employees = new List<Employee>()
                             };
                         };
-                        //adds an employee if it exists to the trainings employee list
+                        //adds an employee if it exists to the departments employee list
                         if (!reader.IsDBNull(reader.GetOrdinal("Employee Id")))
                         {
                             Employee employee = new Employee()
