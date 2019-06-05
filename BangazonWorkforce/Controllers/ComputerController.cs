@@ -53,7 +53,11 @@ namespace BangazonWorkforce.Controllers
 
                     if (!String.IsNullOrEmpty(searchString))
                     {
-                        commandText += $" WHERE Make LIKE '%{searchString}%' OR Manufacturer LIKE '%{searchString}%'";
+                        commandText += $" WHERE Make LIKE '%{searchString}%' OR Manufacturer LIKE '%{searchString}%' ORDER BY AssignDate DESC";
+                    }
+                    else
+                    {
+                        commandText += $" ORDER BY AssignDate DESC";
                     }
 
                     cmd.CommandText = commandText;
@@ -78,7 +82,7 @@ namespace BangazonWorkforce.Controllers
                         //Check to see if the computer is already on the computers list.  If it is, make sure that you are getting the one that is currently assigned, and not the one that is unassigned. 
                         //Also check to make sure that the computer that is added isn't one that is unassigned
                         if (!computers.Any(c => c.Id == computer.Id)) {
-                            Computer computerOnList = computers.Where(s => s.Id == computer.Id).First();
+                            Computer computerOnList = computers.Where(s => s.Id == computer.Id).FirstOrDefault();
 
 
                             if (reader.IsDBNull(reader.GetOrdinal("UnassignDate")) && !reader.IsDBNull(reader.GetOrdinal("assignDate"))) { 
