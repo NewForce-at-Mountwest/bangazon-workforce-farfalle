@@ -34,17 +34,16 @@ namespace BangazonWorkforce.Models.ViewModels
         {
             _connectionString = connectionString;
 
+            ///Get the employee information
 
+            employee = GetEmployee(id);
+            ///Get the employees already assigned training programs
             ThisEmployeeTrainingPrograms = GetThisEmployeesTrainingPrograms(id);
-
-
+            ///Get all the available training programs
             AllFutureAvailableTrainingPrograms = GetAllTraining();
 
+            ///Remove any of the employees training programs from availability
             AllFutureAvailableTrainingPrograms.ExceptWith(ThisEmployeeTrainingPrograms);
-
-
-
-            // compare the select list to the list of training programs already assigned
 
             TrainingPrograms = AllFutureAvailableTrainingPrograms
                 .Select(training => new SelectListItem
@@ -118,23 +117,49 @@ namespace BangazonWorkforce.Models.ViewModels
 
                     return ThisEmployeeTrainingPrograms;
                 }
+
+
             }
         }
-    }
 
-    /// <summary>
-    /// This class allows the hash sets od SimpleTraining to be compared
-    /// </summary>
-    public class TrainingComparer : IEqualityComparer<SimpleTraining>
-    {
-        public bool Equals(SimpleTraining x, SimpleTraining y)
+        private Employee GetEmployee(int id)
         {
-            return x.Id == y.Id;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $"SELECT FirstName, LastName from Employee WHERE Id={id}";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Employee employeeToSend = new Employee();
+
+                    while (reader.Read())
+                    {
+                        employeeToSend.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        employeeToSend.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                    }
+                    reader.Close();
+
+                    return employeeToSend;
+                }
+            }
         }
 
-        public int GetHashCode(SimpleTraining obj)
+        /// <summary>
+        /// This class allows the hash sets of SimpleTraining to be compared
+        /// </summary>
+        public class TrainingComparer : IEqualityComparer<SimpleTraining>
         {
-            return obj.Id.GetHashCode();
+            public bool Equals(SimpleTraining x, SimpleTraining y)
+            {
+                return x.Id == y.Id;
+            }
+
+            public int GetHashCode(SimpleTraining obj)
+            {
+                return obj.Id.GetHashCode();
+            }
         }
     }
 }
