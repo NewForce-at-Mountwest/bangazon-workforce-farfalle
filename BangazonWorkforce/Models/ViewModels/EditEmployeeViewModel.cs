@@ -154,25 +154,29 @@ namespace BangazonWorkforce.Models.ViewModels
                     {
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("UnassignDate")))
                         {
-                            computers.Add(new Computer
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Make = reader.GetString(reader.GetOrdinal("Make")),
-                                Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                            });
+                            if (!computers.Any(x => x.Id == reader.GetInt32(reader.GetOrdinal("Id")))){
+                                computers.Add(new Computer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Make = reader.GetString(reader.GetOrdinal("Make")),
+                                    Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                                });
 
+                            }
+
+                            if (reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                            {
+                                computers.Add(new Computer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Make = reader.GetString(reader.GetOrdinal("Make")),
+                                    Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                                });
+                            }
                         }
 
 
-                        if (reader.IsDBNull(reader.GetOrdinal("ComputerId")))
-                        {
-                            computers.Add(new Computer
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Make = reader.GetString(reader.GetOrdinal("Make")),
-                                Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                            });
-                        }
+                       
 
                     }
 
