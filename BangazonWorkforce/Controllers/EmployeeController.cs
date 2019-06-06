@@ -224,18 +224,42 @@ namespace BangazonWorkforce.Controllers
         // POST: Employee/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EditEmployeeViewModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Employee
+                                            SET 
+                                            LastName=@lastName, 
+                                            DepartmentId=@departmentId 
+                                            WHERE Id = @id DELETE FROM ComputerEmployee                       WHERE EmployeeId = @id INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate) VALUES (@employeeId, @computerId, @assignDate)";
 
+
+
+                        cmd.Parameters.Add(new SqlParameter("@lastName", model.employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentId", model.employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@employeeId", model.employee.Id));
+                        cmd.Parameters.Add(new SqlParameter("@computerId", model.employee.CurrentComputer.Id));
+                        cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                return View(model);
             }
+
         }
 
         // GET: Employee/Delete/5
