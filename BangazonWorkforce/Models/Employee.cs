@@ -18,7 +18,7 @@ namespace BangazonWorkforce.Models
         [Display(Name = "Department")]
         public Department CurrentDepartment { get; set; }
 
-        public Computer CurrentComputer { get; set; }
+        public Computer CurrentComputer { get; set; } 
         public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
