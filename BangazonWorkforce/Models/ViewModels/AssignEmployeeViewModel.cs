@@ -11,7 +11,7 @@ namespace BangazonWorkforce.Models.ViewModels
     {
         public Employee employee { get; set; }
         public int selectedTrainingProgramId { get; set; }
-        public List<TrainingProgram> ThisEmployeeTrainingPrograms { get; set; }
+        //public HashSet<TrainingProgram> ThisEmployeeTrainingPrograms { get; set; }
         public List<SelectListItem> TrainingPrograms { get; set; }
 
 
@@ -30,15 +30,24 @@ namespace BangazonWorkforce.Models.ViewModels
         public AssignEmployeeViewModel(string connectionString, int id)
         {
             _connectionString = connectionString;
+            HashSet<TrainingProgram> Already = new HashSet<TrainingProgram>();
 
-            ThisEmployeeTrainingPrograms = GetThisEmployeesTrainingPrograms(id);
+
+            Already = GetThisEmployeesTrainingPrograms(id);
+
+            HashSet<TrainingProgram> Display = new HashSet<TrainingProgram>();
+
+            Display = GetAllTraining();
+            Display = Display.ExceptWith(Already);
+
+                
 
 // compare the select list to the list of training programs already assigned
 
             TrainingPrograms = GetAllTraining()
                 .Select(training => new SelectListItem
                 {
-                    Text = $"{ training.Name}",
+                    Text = $"{training.Name}",
                     Value = training.Id.ToString()
                 })
                 .ToList();
@@ -52,7 +61,7 @@ namespace BangazonWorkforce.Models.ViewModels
 
         }
 
-        private List<TrainingProgram> GetAllTraining()
+        private HashSet<TrainingProgram> GetAllTraining()
         {
             using (SqlConnection conn = Connection)
             {
@@ -62,7 +71,7 @@ namespace BangazonWorkforce.Models.ViewModels
                     cmd.CommandText = "SELECT sq.TrainingProgramId AS 'Training Program Id', sq.[training program name] AS 'Training Program Name', sq.[employee count] as 'Employee Count', sq.MaxAttendees AS 'Max Attendees', sq.startDate as 'Start Date' FROM(select tp.id as 'trainingProgramId', tp.[Name] as 'training program name', COUNT(employeeId) as 'employee count', MaxAttendees, startDate FROM EmployeeTraining et FULL JOIN TrainingProgram tp ON et.TrainingProgramId = tp.Id GROUP BY tp.Id, tp. [Name], MaxAttendees, startDate) sq WHERE sq.[employee count] <= sq.MaxAttendees AND sq.StartDate > CURRENT_TIMESTAMP";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<TrainingProgram> TrainingPrograms = new List<TrainingProgram>();
+                    HashSet<TrainingProgram> TrainingPrograms = new HashSet<TrainingProgram>();
                     while (reader.Read())
                     {
                         TrainingPrograms.Add(new TrainingProgram
@@ -83,7 +92,7 @@ namespace BangazonWorkforce.Models.ViewModels
             }
         }
 
-        private List<TrainingProgram> GetThisEmployeesTrainingPrograms(int id)
+        private HashSet<TrainingProgram> GetThisEmployeesTrainingPrograms(int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -93,17 +102,16 @@ namespace BangazonWorkforce.Models.ViewModels
                     cmd.CommandText = $"SELECT et.id, tp.name FROM EmployeeTraining et JOIN TrainingProgram tp ON tp.id = et.TrainingProgramId WHERE employeeId={id}";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<TrainingProgram> ThisEmployeeTrainingPrograms = new List<TrainingProgram>();
+                    HashSet<TrainingProgram> ThisEmployeeTrainingPrograms = new HashSet<TrainingProgram>();
                     while (reader.Read())
                     {
                         ThisEmployeeTrainingPrograms.Add(new TrainingProgram
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
                             Name = reader.GetString(reader.GetOrdinal("name"))
+                        });
+                                               
                         }
-                         });
-                }
-
                 reader.Close();
 
                     return ThisEmployeeTrainingPrograms;
