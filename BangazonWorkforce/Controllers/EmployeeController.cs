@@ -43,7 +43,7 @@ namespace BangazonWorkforce.Controllers
                         //joins employee, department, and computer tables
                         string command = $@"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.DepartmentId,
                         d.Id AS 'Department Id', d.Name AS 'Department'
-                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id";
+                        FROM Employee e LEFT JOIN Department d ON e.DepartmentId = d.Id";
 
                         cmd.CommandText = command;
                         SqlDataReader reader = cmd.ExecuteReader();
@@ -157,7 +157,9 @@ namespace BangazonWorkforce.Controllers
                         }
                         reader.Close();
 
+                       
                         return View(employee);
+
                     }
                 }
             }
@@ -279,6 +281,44 @@ namespace BangazonWorkforce.Controllers
                 // TODO: Add delete logic here
 
                 return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Employee/Assign/5
+        public ActionResult Assign(int id)
+        {
+            AssignEmployeeViewModel assignView = new AssignEmployeeViewModel(_config.GetConnectionString("DefaultConnection"), id);
+
+
+            return View(assignView);
+        }
+
+        // POST: Employee/Assign/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Assign(int id, AssignEmployeeViewModel model)
+        {
+            using (SqlConnection conn = Connection)
+                try
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+
+                {
+                    cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId) VALUES (@employeeId, @trainingProgramId)";
+
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", id));
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", model.selectedTrainingProgramId));
+                    
+                    cmd.ExecuteNonQuery();
+
+                        return RedirectToAction("Details", new { id });
+                    }
+
             }
             catch
             {
