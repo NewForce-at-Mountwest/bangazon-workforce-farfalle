@@ -43,7 +43,7 @@ namespace BangazonWorkforce.Controllers
                         //joins employee, department, and computer tables
                         string command = $@"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.DepartmentId,
                         d.Id AS 'Department Id', d.Name AS 'Department'
-                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id";
+                        FROM Employee e LEFT JOIN Department d ON e.DepartmentId = d.Id";
 
                         cmd.CommandText = command;
                         SqlDataReader reader = cmd.ExecuteReader();
