@@ -43,7 +43,7 @@ namespace BangazonWorkforce.Controllers
                         //joins employee, department, and computer tables
                         string command = $@"SELECT e.Id AS 'Employee Id', e.FirstName, e.LastName, e.DepartmentId,
                         d.Id AS 'Department Id', d.Name AS 'Department'
-                        FROM Employee e FULL JOIN Department d ON e.DepartmentId = d.Id";
+                        FROM Employee e LEFT JOIN Department d ON e.DepartmentId = d.Id";
 
                         cmd.CommandText = command;
                         SqlDataReader reader = cmd.ExecuteReader();
@@ -272,13 +272,25 @@ namespace BangazonWorkforce.Controllers
         // POST: Employee/Assign/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Assign(int id, IFormCollection collection)
+        public ActionResult Assign(int id, AssignEmployeeViewModel model)
         {
-            try
+            using (SqlConnection conn = Connection)
+                try
             {
-                // TODO: Add update logic here
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
 
-                return RedirectToAction(nameof(Index));
+                {
+                    cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId) VALUES (@employeeId, @trainingProgramId)";
+
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", id));
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", model.selectedTrainingProgramId));
+                    
+                    cmd.ExecuteNonQuery();
+
+                    return RedirectToAction(nameof(Details));
+                }
+
             }
             catch
             {

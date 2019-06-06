@@ -11,7 +11,7 @@ namespace BangazonWorkforce.Models.ViewModels
     {
         public Employee employee { get; set; }
         public int selectedTrainingProgramId { get; set; }
-        public List<int> ThisEmployeeTrainingPrograms { get; set; }
+        public List<TrainingProgram> ThisEmployeeTrainingPrograms { get; set; }
         public List<SelectListItem> TrainingPrograms { get; set; }
 
 
@@ -32,6 +32,7 @@ namespace BangazonWorkforce.Models.ViewModels
             _connectionString = connectionString;
 
             ThisEmployeeTrainingPrograms = GetThisEmployeesTrainingPrograms(id);
+
 // compare the select list to the list of training programs already assigned
 
             TrainingPrograms = GetAllTraining()
@@ -67,12 +68,11 @@ namespace BangazonWorkforce.Models.ViewModels
                         TrainingPrograms.Add(new TrainingProgram
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Training Program Id")),
-                            Name = reader.GetString(reader.GetOrdinal("Training Program Name")),
-                            StartDate= reader.GetDateTime(reader.GetOrdinal("Start Date")),
+                            Name = reader.GetString(reader.GetOrdinal("Training Program Name"))
+                            //StartDate= reader.GetDateTime(reader.GetOrdinal("Start Date")),
                             //EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
-                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("Max Attendees")
-                            )
-
+                            //MaxAttendees = reader.GetInt32(reader.GetOrdinal("Max Attendees"))
+                            
                         });
                     }
 
@@ -83,24 +83,28 @@ namespace BangazonWorkforce.Models.ViewModels
             }
         }
 
-        private List<int> GetThisEmployeesTrainingPrograms(int id)
+        private List<TrainingProgram> GetThisEmployeesTrainingPrograms(int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $"SELECT TrainingProgramId FROM EmployeeTraining WHERE EmployeeId = {id}";
+                    cmd.CommandText = $"SELECT et.id, tp.name FROM EmployeeTraining et JOIN TrainingProgram tp ON tp.id = et.TrainingProgramId WHERE employeeId={id}";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<int> ThisEmployeeTrainingPrograms = new List<int>();
+                    List<TrainingProgram> ThisEmployeeTrainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
-                        ThisEmployeeTrainingPrograms.Add(                  
-                            reader.GetInt32(reader.GetOrdinal("TrainingProgramId")));
-                    }
+                        ThisEmployeeTrainingPrograms.Add(new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name"))
+                        }
+                         });
+                }
 
-                    reader.Close();
+                reader.Close();
 
                     return ThisEmployeeTrainingPrograms;
                 }
