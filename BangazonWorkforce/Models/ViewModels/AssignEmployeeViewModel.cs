@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace BangazonWorkforce.Models.ViewModels
 {
-    public class AssignEmployeeViewModel 
+    public class AssignEmployeeViewModel
     {
         public Employee employee { get; set; }
         public int selectedTrainingProgramId { get; set; }
-        private HashSet<SimpleTraining> ThisEmployeeTrainingPrograms { get; set; } = new HashSet<SimpleTraining>(new TrainingComparer());
-        private HashSet<SimpleTraining> AllFutureAvailableTrainingPrograms { get; set; } = new HashSet<SimpleTraining>(new TrainingComparer());
+        private HashSet<SimpleTraining> ThisEmployeeTrainingPrograms { get; set; } = new HashSet<SimpleTraining>();
+        private HashSet<SimpleTraining> AllFutureAvailableTrainingPrograms { get; set; } = new HashSet<SimpleTraining>();
 
         public List<SelectListItem> TrainingPrograms { get; set; }
 
@@ -80,8 +80,6 @@ namespace BangazonWorkforce.Models.ViewModels
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Training Program Id")),
                             Name = reader.GetString(reader.GetOrdinal("Training Program Name"))
-                           
-                            
                         });
                     }
 
@@ -112,13 +110,11 @@ namespace BangazonWorkforce.Models.ViewModels
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
                             Name = reader.GetString(reader.GetOrdinal("name"))
+                        });
 
 
-                        });                   
-                        
-                                               
-                        }
-                reader.Close();
+                    }
+                    reader.Close();
 
                     return ThisEmployeeTrainingPrograms;
                 }
@@ -126,11 +122,14 @@ namespace BangazonWorkforce.Models.ViewModels
         }
     }
 
+    /// <summary>
+    /// This class allows the hash sets od SimpleTraining to be compared
+    /// </summary>
     public class TrainingComparer : IEqualityComparer<SimpleTraining>
     {
         public bool Equals(SimpleTraining x, SimpleTraining y)
         {
-            return x.Id==y.Id;
+            return x.Id == y.Id;
         }
 
         public int GetHashCode(SimpleTraining obj)
