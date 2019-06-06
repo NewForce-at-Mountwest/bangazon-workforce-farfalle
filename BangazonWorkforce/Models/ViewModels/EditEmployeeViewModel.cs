@@ -145,14 +145,14 @@ namespace BangazonWorkforce.Models.ViewModels
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT Computer.Id, Make, Manufacturer, UnassignDate, EmployeeId FROM Computer LEFT JOIN ComputerEmployee ON Computer.Id = ComputerId";
+                    cmd.CommandText = @"SELECT ComputerId, Computer.Id, Make, Manufacturer, UnassignDate, EmployeeId FROM Computer FULL JOIN ComputerEmployee ON Computer.Id = ComputerId";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Computer> computers = new List<Computer>();
 
                     while (reader.Read())
                     {
-                        if (reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("UnassignDate")))
                         {
                             computers.Add(new Computer
                             {
@@ -163,7 +163,8 @@ namespace BangazonWorkforce.Models.ViewModels
 
                         }
 
-                        if (!reader.IsDBNull(reader.GetOrdinal("UnassignDate")))
+
+                        if (reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                         {
                             computers.Add(new Computer
                             {

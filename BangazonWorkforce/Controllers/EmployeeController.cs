@@ -237,16 +237,17 @@ namespace BangazonWorkforce.Controllers
                                             SET 
                                             LastName=@lastName, 
                                             DepartmentId=@departmentId 
-                                            WHERE Id = @id DELETE FROM ComputerEmployee                       WHERE EmployeeId = @id INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate) VALUES (@employeeId, @computerId, @assignDate)";
+                                            WHERE Id = @id UPDATE ComputerEmployee SET UnassignDate=@UnassignDate WHERE EmployeeId=@id INSERT INTO ComputerEmployee (EmployeeId, ComputerId, AssignDate) VALUES (@employeeId, @computerId, @assignDate)";
 
 
 
                         cmd.Parameters.Add(new SqlParameter("@lastName", model.employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentId", model.employee.DepartmentId));
-                        cmd.Parameters.Add(new SqlParameter("@employeeId", model.employee.Id));
+                        cmd.Parameters.Add(new SqlParameter("@employeeId", id));
                         cmd.Parameters.Add(new SqlParameter("@computerId", model.employee.CurrentComputer.Id));
                         cmd.Parameters.Add(new SqlParameter("@assignDate", DateTime.Now));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.Parameters.Add(new SqlParameter("UnassignDate", DateTime.Now));
 
                         int rowsAffected = cmd.ExecuteNonQuery();
 
@@ -255,7 +256,7 @@ namespace BangazonWorkforce.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch(Exception e)
             {
                 return View(model);
             }
