@@ -11,7 +11,10 @@ namespace BangazonWorkforce.Models.ViewModels
     {
         public Employee employee { get; set; }
         public int selectedTrainingProgramId { get; set; }
-        //public HashSet<TrainingProgram> ThisEmployeeTrainingPrograms { get; set; }
+        public HashSet<TrainingProgram> ThisEmployeeTrainingPrograms { get; set; } = new HashSet<TrainingProgram>();
+        public HashSet<TrainingProgram> AllFutureAvailableTrainingPrograms { get; set; } = new HashSet<TrainingProgram>();
+        public HashSet<TrainingProgram> MakeList { get; set; } = new HashSet<TrainingProgram>();
+
         public List<SelectListItem> TrainingPrograms { get; set; }
 
 
@@ -33,18 +36,20 @@ namespace BangazonWorkforce.Models.ViewModels
             HashSet<TrainingProgram> Already = new HashSet<TrainingProgram>();
 
 
-            Already = GetThisEmployeesTrainingPrograms(id);
+            ThisEmployeeTrainingPrograms = GetThisEmployeesTrainingPrograms(id);
 
             HashSet<TrainingProgram> Display = new HashSet<TrainingProgram>();
 
-            Display = GetAllTraining();
-            Display = Display.ExceptWith(Already);
+            AllFutureAvailableTrainingPrograms = GetAllTraining();
 
-                
+            MakeList = AllFutureAvailableTrainingPrograms.ExceptWith(ThisEmployeeTrainingPrograms);
 
-// compare the select list to the list of training programs already assigned
 
-            TrainingPrograms = GetAllTraining()
+
+
+            // compare the select list to the list of training programs already assigned
+
+            TrainingPrograms = Display.ExceptWith(Already)
                 .Select(training => new SelectListItem
                 {
                     Text = $"{training.Name}",
