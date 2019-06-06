@@ -4,6 +4,9 @@ This application allows the Human Resource and IT departments at the company Ban
 
 ### EMPLOYEES
 
+#### Assign an employee to a training program
+From the employee details view, you can click on the 'assign to training program' affordcance to assign the employee to a training program.  You will be presented with a screen that has their name and a dropdown of future training programs that they are not already registered for.
+
 ### DEPARTMENTS
 The default view for departments should list all of the departments, with a column that shows the number of employees assigned to that department. Each department should have a details view button that will show you more details about the department, including each employees first/last name.
 

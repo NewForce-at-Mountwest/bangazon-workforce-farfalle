@@ -157,7 +157,9 @@ namespace BangazonWorkforce.Controllers
                         }
                         reader.Close();
 
+                       
                         return View(employee);
+
                     }
                 }
             }
@@ -251,6 +253,44 @@ namespace BangazonWorkforce.Controllers
                 // TODO: Add delete logic here
 
                 return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Employee/Assign/5
+        public ActionResult Assign(int id)
+        {
+            AssignEmployeeViewModel assignView = new AssignEmployeeViewModel(_config.GetConnectionString("DefaultConnection"), id);
+
+
+            return View(assignView);
+        }
+
+        // POST: Employee/Assign/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Assign(int id, AssignEmployeeViewModel model)
+        {
+            using (SqlConnection conn = Connection)
+                try
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+
+                {
+                    cmd.CommandText = @"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId) VALUES (@employeeId, @trainingProgramId)";
+
+                    cmd.Parameters.Add(new SqlParameter("@employeeId", id));
+                    cmd.Parameters.Add(new SqlParameter("@trainingProgramId", model.selectedTrainingProgramId));
+                    
+                    cmd.ExecuteNonQuery();
+
+                        return RedirectToAction("Details", new { id });
+                    }
+
             }
             catch
             {
