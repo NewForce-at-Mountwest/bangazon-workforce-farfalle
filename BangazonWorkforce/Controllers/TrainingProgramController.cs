@@ -47,7 +47,6 @@ namespace BangazonWorkforce.Controllers
             FROM TrainingProgram t
         ";
                     SqlDataReader reader = cmd.ExecuteReader();
-
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
                     while (reader.Read())
                     {
@@ -140,8 +139,6 @@ namespace BangazonWorkforce.Controllers
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     TrainingProgram trainingToDisplay = null;
-                   
-
                     while (reader.Read())
                     {
                         if (trainingToDisplay == null)
@@ -239,10 +236,8 @@ namespace BangazonWorkforce.Controllers
                             StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
                             EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate")),
                             MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendees")),
-
                         };
                     }
-
                     reader.Close();
                     //hopefully makes it so you can't edit past trainings 
                     //but there shouldn't be a way to naturally navigate to edit for a past training
