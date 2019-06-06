@@ -152,6 +152,7 @@ namespace BangazonWorkforce.Models.ViewModels
 
                     while (reader.Read())
                     {
+                        //Checks to see if computer is not already in the list and unassigned before adding it to the list
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("UnassignDate")))
                         {
                             if (!computers.Any(x => x.Id == reader.GetInt32(reader.GetOrdinal("Id")))){
@@ -164,14 +165,18 @@ namespace BangazonWorkforce.Models.ViewModels
 
                             }
 
+                            //Checks to see if computer has ever been assigned, or if it is in the list before adding it
                             if (reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                             {
-                                computers.Add(new Computer
+                                if (!computers.Any(x => x.Id == reader.GetInt32(reader.GetOrdinal("Id"))))
                                 {
-                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                    Make = reader.GetString(reader.GetOrdinal("Make")),
-                                    Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
-                                });
+                                    computers.Add(new Computer
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                        Make = reader.GetString(reader.GetOrdinal("Make")),
+                                        Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                                    });
+                                }
                             }
                         }
 
